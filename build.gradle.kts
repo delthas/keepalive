@@ -2,17 +2,17 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.3.50"
-	maven
+    maven
     `maven-publish`
 }
 
-group = "fr.delthas"
-version = "0.0.1-SNAPSHOT"
+allprojects {
+    group = "fr.delthas"
+    version = "0.0.2-SNAPSHOT"
 
-val deployerJars: Configuration by configurations.creating
-
-repositories {
-    jcenter()
+    repositories {
+        jcenter()
+    }
 }
 
 dependencies {
@@ -20,10 +20,7 @@ dependencies {
     implementation("net.java.dev.jna:jna:5.5.0")
     testImplementation("junit:junit:4.12")
     testImplementation("org.slf4j:slf4j-simple:1.7.25")
-    testImplementation("commons-net:commons-net:3.6")
-    deployerJars("org.apache.maven.wagon:wagon-ftp:2.2")
 }
-
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
@@ -37,12 +34,18 @@ tasks.test {
 
 tasks.register<Jar>("sourcesJar") {
     archiveClassifier.set("sources")
-    from(sourceSets.main.get().allJava)
+    from(sourceSets.main.get().allSource)
 }
 
 tasks.register<Jar>("javadocJar") {
     archiveClassifier.set("javadoc")
     from(tasks.javadoc.get().destinationDir)
+}
+
+val deployerJars: Configuration by configurations.creating
+
+dependencies {
+    deployerJars("org.apache.maven.wagon:wagon-ftp:2.2")
 }
 
 tasks.named<Upload>("uploadArchives") {
@@ -55,4 +58,3 @@ tasks.named<Upload>("uploadArchives") {
         }
     }
 }
-

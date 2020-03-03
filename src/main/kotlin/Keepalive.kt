@@ -183,7 +183,7 @@ class Keepalive private constructor() {
         private var socketImplMethod: Method
         private var fileDescriptorMethod: Method
         private var fdField: Field
-        private var handleField: Field
+        private var handleField: Field?
 
         init {
             windows = System.getProperty("os.name").startsWith("Windows")
@@ -192,17 +192,27 @@ class Keepalive private constructor() {
             socketImplMethod.isAccessible = true
             fileDescriptorMethod = SocketImpl::class.java.getDeclaredMethod("getFileDescriptor")
             fileDescriptorMethod.isAccessible = true
-            fdField = FileDescriptor::class.java.getDeclaredField("fd")
+            fdField = try {
+                // openjdk
+                FileDescriptor::class.java.getDeclaredField("fd")
+            } catch(e: NoSuchFieldException) {
+                // android
+                FileDescriptor::class.java.getDeclaredField("descriptor")
+            }
             fdField.isAccessible = true
-            handleField = FileDescriptor::class.java.getDeclaredField("handle")
-            handleField.isAccessible = true
+            handleField = try {
+                FileDescriptor::class.java.getDeclaredField("handle")
+            } catch(ignore: NoSuchFieldException) {
+                null
+            }
+            handleField?.isAccessible = true
         }
 
         private fun getFd(socket: Socket): Long {
             val socketImpl = socketImplMethod.invoke(socket) as SocketImpl
             val fileDescriptor = fileDescriptorMethod.invoke(socketImpl) as FileDescriptor
-            if(windows) {
-                val handle = handleField.get(fileDescriptor) as Long
+            if(windows && handleField != null) {
+                val handle = handleField!!.get(fileDescriptor) as Long
                 if(handle != -1L) {
                     return handle
                 }

@@ -1,6 +1,6 @@
 # keepalive
 
-A small and lightweight library to set the keepalive idle time and interval on a `Socket`, in a cross-platform manner.
+A small and lightweight library to set the keepalive idle time and interval on a `Socket`, in a cross-platform manner (works on Windows, Linux, Android, ...).
 
 This feature has been added to Linux and Mac OS in [Java 11](https://docs.oracle.com/en/java/javase/11/docs/api/jdk.net/jdk/net/ExtendedSocketOptions.html), but not in previous Java versions or to Windows.
 
@@ -12,7 +12,7 @@ For Kotlin users, keepalive also provides a utility class, `KeepaliveUtils`, wit
 
 ## Usage
 
-The latest version is: **`0.0.1`**
+The latest version is: **`0.0.2`**
 
 ### Maven
 
@@ -47,6 +47,9 @@ repositories {
 
 dependencies {
     implementation 'fr.delthas:keepalive:VERSION'
+
+    // if running on android, also add
+    implementation 'fr.delthas:keepalive-android:VERSION'
 }
 ```
 
@@ -63,15 +66,26 @@ repositories {
 
 dependencies {
     implementation("fr.delthas:keepalive:VERSION")
+
+    // if running on android, also add
+    implementation("fr.delthas:keepalive-android:VERSION")
 }
 ```
 
 ## Status
 
-keepalive is experimental and has been successfully tested on Windows.
+keepalive is experimental, but has been successfully tested on several platforms.
 
-| OS | Support |
+| Platform | Support |
 | -- | -- |
 | Windows | Yes, tested |
-| Unix | Yes |
+| Linux | Yes, tested |
 | Darwin (MacOS) | Yes |
+
+keepalive does access an internal private field which is not part of the official Java API, so it is JDK-implementation-dependent:
+
+| JDK | Support |
+| -- | -- |
+| OpenJDK | Yes, tested |
+| Android | Yes, tested |
+| GNU Classpath | No |
